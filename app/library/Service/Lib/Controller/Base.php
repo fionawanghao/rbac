@@ -1,0 +1,54 @@
+<?php
+
+Namespace Service\Lib\Controller;
+
+class Base extends \Yaf_Controller_Abstract
+{
+	public function jsonRender($data)
+	{
+		header('Content-Type:application/json; charset=utf-8');
+        echo json_encode($data);
+	}
+	
+	public function ajaxRender($data = array(), $msg = null)
+	{
+		$data = array('ret' => 0, 'data' => $data, 'msg' => $msg);
+		return $this->jsonRender($data);
+	}
+	
+	public function errorAjaxRender($msg = null)
+	{
+		$data = array('ret' => 1, 'msg' => $msg);
+		return $this->jsonRender($data);
+	}
+	
+	public function  getPost($name, $if_not_exist = null, $security = true)
+	{
+		if (!isset($_POST[$name])) {
+			return $if_not_exist;
+		}
+		
+		$result = $_POST[$name];
+		if (is_array($result) && $security) {
+			foreach ($result as $key => $value) {
+				$result[$key] = htmlSpecialChars($value); 
+			}
+		}
+		
+		if (!is_array($result) && $security) {
+			$result = htmlSpecialChars($result);
+		}
+		
+		return $result;
+	}
+	
+	public function getQuery($name, $if_not_exist = null, $security = true)
+	{
+		$string = isset($_GET[$name]) ? urldecode($_GET($name)) : $if_not_exist;
+		if($security){
+			$string = htmlSpecialChars($string,ENT_QUOTES);
+		}
+		return $string;
+	}
+	
+}
