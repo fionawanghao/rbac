@@ -1,4 +1,5 @@
 <?php
+
 /* vim: set expandtab tabstop=4 shiftwidth=4 softtabstop=4 foldmethod=marker: */
 
 /**
@@ -18,6 +19,11 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     // {{{ functions
     // {{{ public function _initConfig()
 
+	public function _initSession() 
+	{
+		session_start();
+	}
+	
     /**
      * ³õÊ¼»¯ÅäÖÃ
      *
@@ -45,6 +51,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
         define('UC_TABLE_UC_ROLE', Yaf_Registry::get('config')->table->uc_role);
         define('UC_TABLE_UC_USER', Yaf_Registry::get('config')->table->uc_user);
         define('UC_TABLE_UC_RESOURCE', Yaf_Registry::get('config')->table->uc_resource);
+        define('UC_TABLE_USER_INFO', Yaf_Registry::get('config')->table->user_info);
         define('UC_TABLE_UC_USER_DOMAIN_ROLE_RELATION', Yaf_Registry::get('config')->table->uc_user_domain_role_relation);
         define('UC_TABLE_UC_DOMAIN_ROLE_RESOURCE_RELATION', Yaf_Registry::get('config')->table->uc_domain_role_resource_relation);
 
@@ -77,7 +84,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
      */
     public function _initLoader(Yaf_Dispatcher $dispatcher)
     {
-        //Yaf_Loader::import(Yaf_Registry::get('config')->application->vendor . '/autoload.php');
+        Yaf_Loader::import(APP_PATH .'/app/vendor/autoload.php');
     }
 
     // }}}
@@ -93,7 +100,7 @@ class Bootstrap extends Yaf_Bootstrap_Abstract
     public function _initPlugin(Yaf_Dispatcher $dispatcher)
     {
         $dispatcher->registerPlugin(new RoutePlugin());
-        //$dispatcher->registerPlugin(new CheckLogonPlugin());
+        $dispatcher->registerPlugin(new CheckLogonPlugin());
     }
 
     // }}}

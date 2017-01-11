@@ -3,6 +3,7 @@ use Service\Lib\Controller\Base;
 
 class DomainController extends Base
 {
+	
 	private $allowType = array(1, 2);
 	private $allowStatus = array(1, 2);
 	
@@ -15,22 +16,32 @@ class DomainController extends Base
 		$domain = new DomainModel;
 		
 		if(empty($name)){
-			return $this->errorAjaxRender('产品线名称不能为空');
+			$error = '产品线名称不能为空';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		}
 		$domain_info = $domain->domainInfoByName($name);
 		if(!empty($domain_info)){
-			return $this->errorAjaxRender('该产品线已经存在，不能重复添加');
+			$error = '添加的产品线名称重复添加';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		}
 		if(empty($desc)){
-			return $this->errorAjaxRender('产品线描述不能为空');
+			$error = '添加的产品线描述为空';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		}
 	
 		if(!in_array($type, $this->allowType)){
-			return $this->errorAjaxRender('产品线url类型只能是数字1表示产品线提供URL，或者数字2表示产品线自行控制，不提供URL，不能是其他的值');
+			$error = '产品线url类型只能是数字1表示产品线提供URL，或者数字2表示产品线自行控制，不提供URL，不能是其他的值';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		}
 		
 		if(!in_array($status, $this->allowStatus)){
-			return $this->errorAjaxRender('产品线状态只能是数字1表示可用，或者数字2表示禁用，不能是其他的值');
+			$error = '产品线状态只能是数字1表示可用，或者数字2表示禁用，不能是其他的值';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		}
 		$salt = md5($name.'12345');
 		$data = array($name,$desc,$type,$salt,$default_role_id,$status,time(),time());
@@ -40,8 +51,9 @@ class DomainController extends Base
 		}catch(\Exception $e){
 			return $this->errorAjaxRender($e->getMessage());
 		}
-		
-		return $this->ajaxRender(array(), '添加产品线成功');	
+		$info = '添加产品线'.$name.'成功';
+		$this->logger->info($info,$data);
+		return $this->ajaxRender(array(), $info);	
     }
 	
 	public function listAction()
@@ -69,6 +81,7 @@ class DomainController extends Base
 	
 	public function updateAction()
 	{
+		
 		$domain = new DomainModel;
 		$id = $this->getPost('id');
 		$name = $this->getPost('domain_name'); 
@@ -80,17 +93,25 @@ class DomainController extends Base
 		
 		$info = $domain->domainInfo($id);
 		if(is_null($id) || empty(trim($id))){
-			return $this->errorAjaxRender('ID不能为空');
+			$error = '更新的产品线id为空';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		}
 		if(empty($info)){
-			return $this->errorAjaxRender('更新的记录不存在');
+			$error = '更新的产品线记录不存在';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		} elseif($info['is_delete'] == 1){
-			return $this->errorAjaxRender('更新的记录已经删除');
+			$error = '更新的产品线记录已经删除';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		}
 		
 		if (!is_null($name)) {
 			if (empty(trim($name))) {
-				return $this->errorAjaxRender('产品线名称不能为空');
+				$error = '更新的产品线名称为空';
+				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
 			} else {
 				$data['domain_name'] = trim($name);
 			}
@@ -98,7 +119,9 @@ class DomainController extends Base
 		
 		if(!is_null($desc)){
 			if(empty(trim($desc))){
-				return $this->errorAjaxRender('产品线描述不能为空');	
+				$error = '更新的产品线描述为空';
+				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);	
 			} else {
 				$data['domain_desc'] = $desc;
 			}
@@ -107,10 +130,14 @@ class DomainController extends Base
 		if (!is_null($type)) {
 			$type = trim($type);
 			if(empty($type)){
-				return $this->errorAjaxRender('产品线url类型不能为空');
+				$error = '更新的产品线url类型不能为空';
+				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
 			}
 			if(!in_array($type, $this->allowType)){
-				return $this->errorAjaxRender('产品线url类型只能是数字1表示产品线提供URL，或者数字2表示产品线自行控制，不提供URL，不能是其他的值');
+				$error = '产品线url类型只能是数字1表示产品线提供URL，或者数字2表示产品线自行控制，不提供URL，不能是其他的值';
+				$this->logger->error($error ,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error );
 			}
 			$data['domain_type'] = $type;
 		}
@@ -118,7 +145,9 @@ class DomainController extends Base
 		if(!is_null($default_role_id)){
 			$default_role_id = trim($default_role_id);
 			if(empty($default_role_id)){
-				return $this->errorAjaxRender('default_role_id不能为空');
+				$error = '更新的产品线default_role_id不能为空';
+				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
 			}
 			$data['default_role_id'] = $default_role_id;
 		}
@@ -126,16 +155,22 @@ class DomainController extends Base
 		if(!is_null($status)){
 			$status = trim($status);
 			if(empty($status)){
-				return $this->errorAjaxRender('产品线状态不能为空');
+				$error = '更新的产品线状态不能为空';
+				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
 			}
 			if(!in_array($status, $this->allowStatus)){
-				return $this->errorAjaxRender('产品线状态只能是数字1表示可用，或者数字2表示禁用，不能是其他的值');
+				$error = '更新的产品线状态有误，只能是1或者2';
+				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
 			}
 			$data['status'] = $status;
 		}
 		
 		if (empty($data)) {
-			return $this->errorAjaxRender('产品线没有更新内容');
+			$error = '产品线没有更新内容';
+			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
 		}
 		$data['update_time'] = time();
 		try{
@@ -143,12 +178,14 @@ class DomainController extends Base
 		}catch(\Exception $e){
 			return $this->errorAjaxRender($e->getMessage());
 		}
-		
-		return $this->ajaxRender(array(), '更新产品线成功');
+		$error = '更新ID为'.$id.'产品线成功';
+		$this->logger->info($error,$data);
+		return $this->ajaxRender(array(), $error);
 	}
 	
 	public function deleteAction()
 	{
+		
 		$domain = new DomainModel;
 		$id = explode(',',$this->getPost('id',''));
 		
@@ -159,7 +196,9 @@ class DomainController extends Base
 		foreach($id as $val){
 			$val = trim($val);
 			if(empty($val)){
-				return $this->errorAjaxRender('删除的记录ID不能为空');
+				$error = '删除的记录ID不能为空';
+				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
 			}
 		}
 		
@@ -170,7 +209,9 @@ class DomainController extends Base
 		}
 		foreach($domain_batch_info as $val){
 			if(isset($val['is_delete']) && $val['is_delete'] == 1 ){
-				return $this->errorAjaxRender('id是'.$val['id'].'的记录已删除，不能再次删除');
+				$error = 'id是'.$val['id'].'的记录已删除，不能再次删除';
+				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
 			}
 		}
 		
@@ -178,6 +219,9 @@ class DomainController extends Base
 			$ret = $domain->del($id);	
 		}catch(\Exception $e){
 			return $this->errorAjaxRender($e->getMessage());
+		}
+		foreach($id as $a){
+			$this->logger->info('删除ID为'.$a.'的记录成功');
 		}
 		
 		return $this->ajaxRender(array(),'删除记录成功');	
