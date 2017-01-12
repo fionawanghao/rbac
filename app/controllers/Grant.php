@@ -76,16 +76,10 @@ class GrantController extends Base
 			$this->logger()->debug($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
+		$info = '授权成功';
+		$this->logger()->info($info,array('用户ID：'.$user_id.',产品线ID：'.$domain_id.',角色ID：'.$role_id));
+		return $this->ajaxRender(array(),$info);
 		
-		if(!$ret){
-			$error = '授权失败';
-			$this->logger()->error($error,array('用户ID：'$user_id,'产品线ID：'.$domain_id,'角色ID：'.$role_id));
-			return $this->errorAjaxRender($error);	
-		}else{
-			$info = '授权成功';
-			$this->logger()->info($info,array('用户ID：'$user_id,'产品线ID：'.$domain_id,'角色ID：'.$role_id));
-			return $this->ajaxRender(array(),$info);
-		}
 	}
 	
 	public function del_roleAction()
@@ -94,8 +88,8 @@ class GrantController extends Base
 		$grant = new GrantModel;
 		$user = new UserModel;
 		$role = new RoleModel;
-		$user_id = trim($this->getPost('user_id',1));
-		$role_id = trim($this->getPost('role_id',1));
+		$user_id = trim($this->getPost('user_id',''));
+		$role_id = trim($this->getPost('role_id',''));
 		$data =  array();
 		
 		if(empty($user_id)){
@@ -123,10 +117,10 @@ class GrantController extends Base
 			$this->logger()->debug($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
-			$info = '角色收回成功';
-			$this->logger()->debug($info,array('user_id:'.$user_id,'role_id'.$role_id));
-			return $this->ajaxRender(array(),$info);
-		}
+		$info = '角色收回成功';
+		$this->logger()->debug($info,array('user_id:'.$user_id,'role_id'.$role_id));
+		return $this->ajaxRender(array(),$info);
+		
 	}
 	
 	public function add_resourceAction()
@@ -135,8 +129,8 @@ class GrantController extends Base
 		$grant = new GrantModel;
 		$role = new RoleModel;
 		$resource = new ResourceModel;
-		$role_id = trim($this->getPost('role_id',13));
-		$resource_id = trim($this->getPost('resource_id',5));
+		$role_id = trim($this->getPost('role_id',''));
+		$resource_id = trim($this->getPost('resource_id',''));
 		
 		if(empty($role_id)){
 			$error = '角色ID不能为空';
@@ -187,10 +181,11 @@ class GrantController extends Base
 		}
 		$role_resource_info = $grant->roleResourceInfo($role_id,$resource_id);
 		if(!empty($role_resource_info)){
-			$error = '该权限已有角色，同一权限不可以授予多个角色';
+			$error = '该角色已经被授予过该权限，不能再次授予';
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
+		
 		if($role_info['domain_id'] != $resource_info['domain_id']){
 			$error = '该角色和该权限不在同一产品线下';
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
@@ -244,7 +239,7 @@ class GrantController extends Base
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		$info = '权限收回成功';
-		$this->logger()->error($info,array('role_id'.$role_id,'resource_id'.$resource_id));
+		$this->logger()->error($info,array('role_id:'.$role_id,',resource_id:'.$resource_id));
 		return $this->ajaxRender(array(),$info);
 		
 	}

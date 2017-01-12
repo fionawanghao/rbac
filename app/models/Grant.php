@@ -15,8 +15,8 @@ class GrantModel extends ModelBase
 		$db = $this->getDb();
 		$sql = 'select * from '.UC_TABLE_UC_USER_DOMAIN_ROLE_RELATION .' where user_id=? and role_id=?';
 		$stm = $db->prepare($sql);
-		if($stm->execute(array($user_id,$role_id))){
-			throw new /Exception('fail to get roleUserInfo');
+		if(!$stm->execute(array($user_id,$role_id))){
+			throw new \Exception('fail to get roleUserInfo');
 		}
 		$result = $stm->fetch(PDO::FETCH_ASSOC);
 		return $result;
@@ -28,7 +28,7 @@ class GrantModel extends ModelBase
 		$sql = 'select * from '.UC_TABLE_UC_USER_DOMAIN_ROLE_RELATION .' where user_id=? and domain_id=?';
 		$stm = $db->prepare($sql);
 		if(!$stm->execute(array($user_id,$domain_id))){
-			throw new /Exception('fail to get userDomainInfo');
+			throw new \Exception('fail to get userDomainInfo');
 		}
 		
 		$result = $stm->fetch(PDO::FETCH_ASSOC);

@@ -25,11 +25,20 @@ class RoleController extends Base
 		}
 		$domain_info = $domain->domainInfo($domain_id);
 		if(!$domain_info){
-			$error = '输入的产品ID不存在';
+			$error = '输入的产品线ID不存在';
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
-		
+		if($domain_info['is_delete'] == 1){
+			$error = '输入的产品线ID已经删除';
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
+		}
+		if($domain_info['status'] == 2){
+			$error = '输入的产品线ID状态为禁用';
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
+		}
 		$role_info_by_name = $role->roleInfoByNameDomainId($role_name,$domain_id);
 		if(!empty($role_info_by_name)){
 			$error = '该产品线的该角色已经存在';
@@ -68,7 +77,8 @@ class RoleController extends Base
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		$error = '角色添加成功';
-		$this->logger()->info($error,$data);
+		$arr = array('domain_id:'.$domain_id,'role_name:'.$role_name,'role_desc:'.$role_desc,'role_type:'.$role_type,'status:'.$status,'create_time:'.time(),'update_time:'.time());
+		$this->logger()->info($error,$arr);
 		return $this->ajaxRender(array(),$error);
 	}
 	
@@ -102,7 +112,7 @@ class RoleController extends Base
 		
 		$role = new RoleModel;
 		$domain = new DomainModel;
-		$id = $this->getPost('id',14);
+		$id = $this->getPost('id');
 		$role_name = $this->getPost('role_name');
 		$role_desc = $this->getPost('role_desc');
 		$role_type = $this->getPost('role_type');
@@ -135,9 +145,10 @@ class RoleController extends Base
 				return $this->errorAjaxRender($error);
 			}
 			$roles = $role->rolesOfOneDomain($info['domain_id']);
+			
 			foreach($roles as $v){
 				if($role_name == $v['role_name']){
-					$error = '不能修改为已存在的角色名称';
+					$error = '不能修改为同一产品线下已存在的角色名称';
 					$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 					return $this->errorAjaxRender($error);
 				}
@@ -200,7 +211,7 @@ class RoleController extends Base
 			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
-		$info = '更新角色信息成功';
+		$info = '更新ID为'.$id.'的角色信息成功';
 		$this->logger()->error($info,$data);	
 		return $this->ajaxRender(array(), $info);
 	}

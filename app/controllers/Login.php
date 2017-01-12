@@ -1,4 +1,5 @@
 <?php 
+use Wp\Demo\Test;
 use Service\Lib\Controller\Base;
 class LoginController extends Base
 {

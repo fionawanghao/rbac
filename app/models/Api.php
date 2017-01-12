@@ -4,9 +4,16 @@ use Service\Lib\ModelBase;
 class ApiModel extends ModelBase
 {
 	//如果想控制对某一个产品线的查看权限可以将domain salt 加入到key里面
-	public function getPublicKey($user_id,$salt){
-		$public_key = md5($user_id.'9'.$salt);
-		return $public_key;
+	public function getPublicKey($token, $domain_id, $user_id,$salt){
+		
+		$public_key = md5($user_id.$domain_id .time().$salt);
+		if ($public_key != $token) {
+			$public_key = md5($user_id.$domain_id.(time() -1).$salt);
+			if ($public_key != $token) {
+				return false;
+			}
+		}
+		return true;
 	}
 	
 	//封装一个方法可以查询某个用户在某个产品线下的所有权限

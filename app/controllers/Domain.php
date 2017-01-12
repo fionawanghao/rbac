@@ -11,7 +11,7 @@ class DomainController extends Base
 		$name = trim($this->getPost('domain_name',''));
 		$desc = trim($this->getPost('domain_desc','')); 
 		$type = trim($this->getPost('domain_type',1)); 
-		$default_role_id = $this->getPost('default_role_id',1);
+		$default_role_id = $this->getPost('default_role_id');
 		$status = $this->getPost('status',1);
 		$domain = new DomainModel;
 		
@@ -31,7 +31,14 @@ class DomainController extends Base
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
-	
+		
+		$role = new RoleModel();
+		if(!is_null($default_role_id) && !$role->roleInfo($default_role_id)){
+			$error = '填写默认角色不存在';
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			return $this->errorAjaxRender($error);
+		}
+		
 		if(!in_array($type, $this->allowType)){
 			$error = '产品线url类型只能是数字1表示产品线提供URL，或者数字2表示产品线自行控制，不提供URL，不能是其他的值';
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
@@ -45,7 +52,7 @@ class DomainController extends Base
 		}
 		$salt = md5($name.'12345');
 		$data = array($name,$desc,$type,$salt,$default_role_id,$status,time(),time());
-	
+		
 		try{
 			$ret = $domain->insert($data);	
 		}catch(\Exception $e){
@@ -112,9 +119,12 @@ class DomainController extends Base
 				$error = '更新的产品线名称为空';
 				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
-			} else {
-				$data['domain_name'] = trim($name);
+			} else if($domain->domainInfoByName($name)){
+				$error = '更新的产品线名称已存在';
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
 			}
+			$data['domain_name'] = trim($name);
 		}
 		
 		if(!is_null($desc)){
@@ -142,10 +152,16 @@ class DomainController extends Base
 			$data['domain_type'] = $type;
 		}
 		
+		$role = new RoleModel();
 		if(!is_null($default_role_id)){
 			$default_role_id = trim($default_role_id);
 			if(empty($default_role_id)){
 				$error = '更新的产品线default_role_id不能为空';
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($error);
+			}
+			if(!$role->roleInfo($default_role_id)){
+				$error = '更新的默认角色不存在';
 				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
@@ -160,7 +176,7 @@ class DomainController extends Base
 				return $this->errorAjaxRender($error);
 			}
 			if(!in_array($status, $this->allowStatus)){
-				$error = '更新的产品线状态有误，只能是1或者2';
+				$error = '更新的产品线状态有误，只能是1(可用)或者2(禁用)';
 				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
@@ -185,7 +201,6 @@ class DomainController extends Base
 	
 	public function deleteAction()
 	{
-		
 		$domain = new DomainModel;
 		$id = explode(',',$this->getPost('id',''));
 		
@@ -221,7 +236,7 @@ class DomainController extends Base
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		foreach($id as $a){
-			$this->logger()->info('删除ID为'.$a.'的记录成功');
+			$this->logger()->info('删除ID为'.$a.'的产品线记录成功');
 		}
 		
 		return $this->ajaxRender(array(),'删除记录成功');	

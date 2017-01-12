@@ -65,7 +65,8 @@ class UserController extends Base
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		$error = '用户添加成功';
-		$this->logger()->info($error,$data);
+		$arr = array('network_type: '.$network_type,'name: '.$name,'image: '.$image,'email: '.$email,'status: '.$status);
+		$this->logger()->info($error,$arr);
 		return $this->ajaxRender(array(),$error);
 	}
 	
@@ -94,7 +95,6 @@ class UserController extends Base
 	
 	public function updateAction()
 	{
-		
 		$user = new UserModel;
 		$id = trim($this->getPost('id',''));
 		$network_type = $this->getPost('network_type');
@@ -152,7 +152,7 @@ class UserController extends Base
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
-		
+		  
 		if(!is_null($image)){
 			$image = trim($image);
 			if(empty($image)){
@@ -205,7 +205,7 @@ class UserController extends Base
 			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
-		$error = '更新成功';
+		$error = 'id为'.$id.'的记录更新成功';
 		$this->logger()->info($error,$data);
 		return $this->ajaxRender(array(),$error);
 	}	

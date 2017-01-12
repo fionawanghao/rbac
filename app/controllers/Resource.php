@@ -23,7 +23,7 @@ class ResourceController extends Base
 		}
 		$ret = $domain->domainInfo($domain_id);
 		if(!$ret){
-			$error = '输入的产品ID不存在';
+			$error = '输入的产品线ID不存在';
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
@@ -67,7 +67,8 @@ class ResourceController extends Base
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		$info = '添加权限成功';
-		$this->logger()->info($info,$data);
+		$arr = array('domain_id:'.$domain_id,'resource_url:'.$resource_url,'resource_name:'.$resource_name,'resource_desc:'.$resource_desc,'status:'.$status,'create_time:'.time(),'update_time:'.time());
+		$this->logger()->info($info,$arr);
 		return $this->ajaxRender(array(),$info);
 	}
 	
@@ -184,7 +185,7 @@ class ResourceController extends Base
 			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
-		$error = '修改权限成功';
+		$error = '修改ID为'.$id.'的权限成功';
 		$this->logger()->info($error,$data);
 		return $this->ajaxRender(array(),$error);	
 	}
@@ -230,7 +231,7 @@ class ResourceController extends Base
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		foreach($id as $a){
-			$this->logger()->info('id是'.$a.'的记录删除成功')
+			$this->logger()->info('id是'.$a.'的记录删除成功');
 		}
 		return $this->ajaxRender(array(),'删除记录成功');
 			
