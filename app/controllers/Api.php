@@ -19,60 +19,60 @@ class ApiController extends Base
 		//var_dump($public_key);
 		if(empty($token)){
 			$error = '调用该接口必须填写token';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 	
 		if($token != $public_key){
 			$error = 'token填写有误';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(empty($user_id)){
 			$error = '用户ID不能为空';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);	
 		}
 		$user_info = $user->userInfo($user_id);
 		if(empty($user_info)){
 			$error = '该用户不存在';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($user_info['is_delete']) && ($user_info['is_delete'] == 1)){
 			$error = '该用户已经删除';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($user_info['status']) && ($user_info['status'] == 2)){
 			$error = '该用户状态为禁用';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		if(empty($domain_id)){
 			$error = '产品线ID不能为空'；
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);	
 		}
 		
 		if(empty($domain_info)){
 			$error = '该产品线不存在';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error'该产品线不存在');
 		}
 		
 		if(isset($domain_info['is_delete']) && ($domain_info['is_delete'] == 1)){
 			$error = '该产品线已经删除';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($domain_info['status']) && ($domain_info['status'] == 2)){
 			$error = '该产品线状态为禁用';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
@@ -84,16 +84,16 @@ class ApiController extends Base
 		try{
 			$result = $api->resources($user_id,$domain_id);
 		}catch(\Exception $e){
-			$this->logger->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return errorAjaxRender($e->getMessage());
 		}
 		if(empty($result)){
 			$error = '用户ID为'.$user_id.'的用户在产品线ID为'.$domain_id.'产品线下没有权限';
-			$this->logger->info($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->info($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}else{
 			$info = '用户ID为'.$user_id.'的用户在产品线ID为'.$domain_id.'产品线下有如下权限';
-			$this->logger->info($info,$result);
+			$this->logger()->info($info,$result);
 			return $this->jsonRender($result);
 		} 
 	}
@@ -114,67 +114,67 @@ class ApiController extends Base
 		$public_key = $api->GetPublicKey($user_id,$salt);
 		if(empty($token)){
 			$error = '调用该接口必须填写token';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 	
 		if($token != $public_key){
 			$error = '请填写正确的token';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(empty($user_id)){
 			$error = '用户ID不能为空';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);	
 		}
 		$user_info = $user->userInfo($user_id);
 		if(empty($user_info)){
 			$error = '该用户不存在';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($user_info['is_delete']) && ($user_info['is_delete'] == 1)){
 			$error = '该用户已经删除';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($user_info['status']) && ($user_info['status'] == 2)){
 			$error = '该用户状态为禁用';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		if(empty($domain_id)){
 			$error = '产品线ID不能为空';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);	
 		}
 		
 		if(empty($domain_info)){
 			$error = '产品线ID不能为空';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($domain_info['is_delete']) && ($domain_info['is_delete'] == 1)){
 			$error = '该产品线已经删除';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($domain_info['status']) && ($domain_info['status'] == 2)){
 			$error = '该产品线状态为禁用';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		try{
 			$role_ids = $api->role_ids($user_id,$domain_id);
 		}catch(\Exception $e){
-			$this->logger->error($e->getMessage(),array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($e->getMessage(),array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return errorAjaxRender($e->getMessage());	
 		}
 		
@@ -182,7 +182,7 @@ class ApiController extends Base
 			try{
 				$result = $role->roleInfo($role_id);
 			}catch(\Exception $e){
-				$this->logger->error($e->getMessage(),array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+				$this->logger()->error($e->getMessage(),array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 				return errorAjaxRender($e->getMessage());
 			}	
 			/*$rolenames[$role_id] = $result['role_name'];*/
@@ -194,10 +194,10 @@ class ApiController extends Base
 
 		if(empty($rolenames)){
 			$error = '该用户在该产品线没有设置角色';
-			$this->logger->info($error,array('用户ID：'.$user_id,'产品线ID：'.$domain_id));
+			$this->logger()->info($error,array('用户ID：'.$user_id,'产品线ID：'.$domain_id));
 			return $this->errorAjaxRender($error);
 		}
-		$this->logger->info('用户ID为'.$user_id.'的用户在产品线ID为'.$domain_id.'产品线下的角色如下',$rolenames);
+		$this->logger()->info('用户ID为'.$user_id.'的用户在产品线ID为'.$domain_id.'产品线下的角色如下',$rolenames);
 		return $this->jsonRender($rolenames);
 	}
 	
@@ -218,90 +218,90 @@ class ApiController extends Base
 		
 		if(empty($token)){
 			$error = '调用该接口必须填写token';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 	
 		if($token != $public_key){
 			$error = '请填写正确的token';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(empty($user_id)){
 			$error = '用户ID不能为空';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);	
 		}
 		$user_info = $user->userInfo($user_id);
 		if(empty($user_info)){
 			$error = '该用户不存在';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($user_info['is_delete']) && ($user_info['is_delete'] == 1)){
 			$error = '该用户已经删除';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($user_info['status']) && ($user_info['status'] == 2)){
 			$error = '该用户状态为禁用';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error );
 		}
 		if(empty($domain_id)){
 			$error = '产品线ID不能为空';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);	
 		}
 		
 		if(empty($domain_info)){
 			$error = '该产品线不存在';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($domain_info['is_delete']) && ($domain_info['is_delete'] == 1)){
 			$error = '该产品线已经删除';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($domain_info['status']) && ($domain_info['status'] == 2)){
 			$error = '该产品线状态为禁用';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender('该产品线状态为禁用');
 		}
 		if(empty($resource_url)){
 			$error = '权限不能为空';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);	
 		}
 		
 		$resource_info = $resource->resourceInfoByUrl($resource_url);
 		if(empty($resource_info)){
 			$error = '该权限不存在';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($resource_info['is_delete']) && ($resource_info['is_delete'] == 1)){
 			$error = '该权限已经删除';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(isset($resource_info['status']) && ($resource_info['status'] == 2)){
 			$error = '该权限状态为禁用';
-			$this->logger->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($error,array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		try{
 			$all_urls = $api->resources($user_id,$domain_id);
 		}catch(\Exception $e){
-			$this->logger->error($e->getMessage(),array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
+			$this->logger()->error($e->getMessage(),array('class:'__CLASS__,'function:'__FUNCTION__,'line:'__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}	
 		
@@ -314,11 +314,11 @@ class ApiController extends Base
 		
 		if(!$mark){
 			$info = '该用户没有该权限';
-			$this->logger->info($info,array('用户ID：'.$user_id,'产品线ID：'.$domain_id));
+			$this->logger()->info($info,array('用户ID：'.$user_id,'产品线ID：'.$domain_id));
 			return $this->errorAjaxRender($info);
 		}else{
 			$info = '该用户有该权限';
-			$this->logger->info($info,array('用户ID：'.$user_id,'产品线ID：'.$domain_id,'权限：'.$resource_url));
+			$this->logger()->info($info,array('用户ID：'.$user_id,'产品线ID：'.$domain_id,'权限：'.$resource_url));
 			return $this->ajaxRender(array(),$info);
 		}		
 	}

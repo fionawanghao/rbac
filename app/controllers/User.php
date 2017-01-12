@@ -18,42 +18,42 @@ class UserController extends Base
 	
 		if(empty($name)){
 			$error = '用户名不能为空';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		$user_info_by_name = $user->UserInfoByName($name);
 		if($user_info_by_name){
 			$error = '用户名已存在';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		if(empty($image)){
 			$error = '头像地址不能为空';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(empty($email)){
 			$error = '电子邮箱不能为空';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		$pattern = '/^[0-9a-z\._-]+@[0-9a-z\._-]+$/i';
 		if(!preg_match($pattern,$email)){
 			$error = '请输入正确的电子邮箱格式';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(!in_array($network_type,$this->allow_type)){
 			$error = '网络类型只能是数字1表示内网，或者数字2表示外网';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		if(!in_array($status,$this->allow_status)){
 			$error = '用户状态必须是数字1表示可用，或者数字2表示禁用';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		$data = array($network_type,$name,$image,$email,$status);
@@ -61,11 +61,11 @@ class UserController extends Base
 		try{
 			$ret = $user->add($data);
 		}catch(\Exception $e){
-			$this->logger->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		$error = '用户添加成功';
-		$this->logger->info($error,$data);
+		$this->logger()->info($error,$data);
 		return $this->ajaxRender(array(),$error);
 	}
 	
@@ -106,19 +106,19 @@ class UserController extends Base
 		
 		if(empty($id)){
 			$error = '用户ID不能为空';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
 		$userInfo = $user->userInfo($id);
 		if(empty($userInfo)){
 			$error = '该记录不存在';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		if($userInfo['is_delete'] == 1){
 			$error = '该记录已经删除，不能更新';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
@@ -126,12 +126,12 @@ class UserController extends Base
 			$network_type = trim($network_type);
 			if(empty($network_type)){
 				$error = '网络类型不能为空';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 			if(!in_array($network_type,$this->allow_type)){
 				$error = '网络类型只能是数字1表示内网，或者数字2表示外网';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 			$data['network_type']=$network_type;
@@ -141,7 +141,7 @@ class UserController extends Base
 			$name = trim($name);
 			if(empty($name)){
 				$error = '用户名不能为空';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 			$data['name']=$name;
@@ -149,7 +149,7 @@ class UserController extends Base
 		$user_info_by_name = $user->UserInfoByName($name);
 		if($user_info_by_name){
 			$error = '该用户名已存在';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		
@@ -157,7 +157,7 @@ class UserController extends Base
 			$image = trim($image);
 			if(empty($image)){
 				$error = '用户头像地址不能为空';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 			$data['image'] = $image;
@@ -167,13 +167,13 @@ class UserController extends Base
 			$email = trim($email);
 			if(empty($email)){
 				$error = '电子邮箱不能为空';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 			$pattern = '/^[0-9a-z\._-]+@[0-9a-z\._-]+$/i';
 			if(!preg_match($pattern,$email)){
 				$error = '电子邮箱格式错误';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 			$data['email'] = $email;
@@ -183,12 +183,12 @@ class UserController extends Base
 			$status = trim($status);
 			if(empty($status)){
 				$error = '用户状态不能为空';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 			if(!in_array($status,$this->allow_status)){
 				$error = '用户状态必须是数字1表示可用，或者数字2表示禁用';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 			$data['status'] = $status;
@@ -196,17 +196,17 @@ class UserController extends Base
 		
 		if(empty($data)){
 			$error = '没有添加更新信息';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		try{
 			$ret = $user->update($id,$data);
 		}catch(\Exception $e){
-			$this->logger->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		$error = '更新成功';
-		$this->logger->info($error,$data);
+		$this->logger()->info($error,$data);
 		return $this->ajaxRender(array(),$error);
 	}	
 	
@@ -224,25 +224,25 @@ class UserController extends Base
 			$val = trim($val);
 			if(empty($val)){
 				$error = '删除的记录ID不能为空';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 		}	
 		try{
 			$user_batch_info = $user->userBatchInfo($id);
 		}catch(\Exception $e){
-			$this->logger->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			$this->errorAjaxRender($e->getMessage());
 		}
 		if(!$user_batch_info){
 			$error = '删除的记录不存在';
-			$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
 		foreach($user_batch_info as $v){
 			if(isset($v['is_delete']) && $v['is_delete'] == 1 ){
 				$error = 'id是'.$v['id'].'的记录已删除，不能再次删除';
-				$this->logger->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 				return $this->errorAjaxRender($error);
 			}
 		}	
@@ -250,11 +250,11 @@ class UserController extends Base
 		try{
 			$ret = $user->del($id);	
 		}catch(\Exception $e){
-			$this->logger->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
 		foreach($id as $a){
-			$this->logger->info('ID为'.$a.'的记录删除记录成功');
+			$this->logger()->info('ID为'.$a.'的记录删除记录成功');
 		}	
 		return $this->ajaxRender(array(),'删除记录成功');
 	}
