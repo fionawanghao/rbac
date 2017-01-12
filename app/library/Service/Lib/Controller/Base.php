@@ -9,15 +9,17 @@ class Base extends \Yaf_Controller_Abstract
 {
 	private $logger = null;
 	
-	public function __construct() {
-		parent::__construct();
-		$this->logger = new Logger('uc');
-		$filename = APP_PATH .'/log/' . date('Y.m.d', time()) . '.log';
-		$output = "[%datetime%] %channel%.%level_name%: %message% %context% \r\n";
-		$formatter = new LineFormatter($output);
-		$stream = new StreamHandler($filename, Logger::DEBUG);
-		$stream->setFormatter($formatter);
-		$this->logger->pushHandler($stream);
+	public function logger() {
+		if (is_null($this->logger)) {
+			$this->logger = new Logger('uc');
+			$filename = APP_PATH .'/log/' . date('Y.m.d', time()) . '.log';
+			$output = "[%datetime%] %channel%.%level_name%: %message% %context% \r\n";
+			$formatter = new LineFormatter($output);
+			$stream = new StreamHandler($filename, Logger::DEBUG);
+			$stream->setFormatter($formatter);
+			$this->logger->pushHandler($stream);
+		}
+		return $this->logger;
 	}
 	
 	public function jsonRender($data)
