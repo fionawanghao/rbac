@@ -8,7 +8,7 @@ use Monolog\Formatter\LineFormatter;
 class Base extends \Yaf_Controller_Abstract
 {
 	private $logger = null;
-	
+	private $redis = null;
 	public function logger() {
 		if (is_null($this->logger)) {
 			$this->logger = new Logger('uc');
@@ -20,6 +20,15 @@ class Base extends \Yaf_Controller_Abstract
 			$this->logger->pushHandler($stream);
 		}
 		return $this->logger;
+	}
+	
+	public function getRedis(){
+		
+		if($this->redis == null){
+			$redis = new \Redis();
+			$redis->connect('127.0.0.1',6379);
+		}
+		return $redis;
 	}
 	
 	public function jsonRender($data)
@@ -62,7 +71,7 @@ class Base extends \Yaf_Controller_Abstract
 	
 	public function getQuery($name, $if_not_exist = null, $security = true)
 	{
-		$string = isset($_GET[$name]) ? urldecode($_GET($name)) : $if_not_exist;
+		$string = isset($_GET[$name]) ? urldecode($_GET[$name]) : $if_not_exist;
 		if($security){
 			$string = htmlSpecialChars($string,ENT_QUOTES);
 		}

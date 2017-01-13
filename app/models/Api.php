@@ -6,13 +6,22 @@ class ApiModel extends ModelBase
 	//如果想控制对某一个产品线的查看权限可以将domain salt 加入到key里面
 	public function getPublicKey($token, $domain_id, $user_id,$salt){
 		
-		$public_key = md5($user_id.$domain_id .time().$salt);
+		$public_key = md5($user_id.$domain_id.$salt);
 		if ($public_key != $token) {
 			$public_key = md5($user_id.$domain_id.(time() -1).$salt);
 			if ($public_key != $token) {
 				return false;
 			}
 		}
+		/*
+		$public_key = md5($user_id.$domain_id .time().$salt);
+		if ($public_key != $token) {
+			$public_key = md5($user_id.$domain_id.(time() -1).$salt);
+			if ($public_key != $token) {
+				return false;
+			}
+		}*/
+		
 		return true;
 	}
 	

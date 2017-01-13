@@ -91,11 +91,30 @@ class ApiController extends Base
 			return $this->errorAjaxRender('该有用户在该产品线下没有权限');
 		}*/
 		
-		try{
-			$result = $api->resources($user_id,$domain_id);
-		}catch(\Exception $e){
-			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
-			return errorAjaxRender($e->getMessage());
+		$redis = $this->getRedis();
+		$role_id = array();
+		$resource_info = array();
+		$result = array();
+		if(!empty($redis->get('uc_roles_'.$user_id.'_'.$domain_id))){
+			$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
+			foreach($role_id as $v){
+				$resource_info[] = json_decode($redis->get('uc_role_info_'.$v))[1];  
+			}
+			foreach($resource_info as $val){
+					foreach($val as $v){
+						$result[] = $v->resource_url;
+					}
+			}
+			
+		}else{
+			try{
+				$result = $api->resources($user_id,$domain_id);
+				$redis->set('uc_roles_'.$user_id.'_'.$domain_id,json_encode($api->role_ids($user_id,$domain_id)));
+			}catch(\Exception $e){
+				$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return errorAjaxRender($e->getMessage());
+			}
+			
 		}
 		if(empty($result)){
 			$error = '用户ID为'.$user_id.'的用户在产品线ID为'.$domain_id.'产品线下没有权限';
@@ -105,12 +124,15 @@ class ApiController extends Base
 			$info = '用户ID为'.$user_id.'的用户在产品线ID为'.$domain_id.'产品线下有如下权限';
 			$this->logger()->info($info,$result);
 			return $this->jsonRender($result);
-		} 
+		}
+	
+	
 	}
 	
 	public function rolesAction()
 	{
-		
+		$redis = $this->getRedis();
+		$role_id = array();
 		$api = new ApiModel;
 		$user = new UserModel;
 		$role = new RoleModel;
@@ -181,27 +203,35 @@ class ApiController extends Base
 			return $this->errorAjaxRender($error);
 		}
 		
-		try{
-			$role_ids = $api->role_ids($user_id,$domain_id);
-		}catch(\Exception $e){
-			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
-			return errorAjaxRender($e->getMessage());	
-		}
-		
-		foreach($role_ids as $role_id){
+		if(!empty($redis->get('uc_roles_'.$user_id.'_'.$domain_id))){
+			$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
+			foreach($role_id as $k => $v){
+				$rolenames[$k]['role_id'] = json_decode($redis->get('uc_role_info_'.$v))[0]->id;  
+				$rolenames[$k]['role_name'] = json_decode($redis->get('uc_role_info_'.$v))[0]->role_name;  
+			}
+		}else{
 			try{
-				$result = $role->roleInfo($role_id);
+				$role_ids = $api->role_ids($user_id,$domain_id);
+				$redis->set('uc_roles_'.$user_id.'_'.$domain_id,json_encode($role_ids));
 			}catch(\Exception $e){
 				$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
-				return errorAjaxRender($e->getMessage());
-			}	
-			/*$rolenames[$role_id] = $result['role_name'];*/
-			$rolenames[] = array(
-				'role_id' => $role_id,
-				'role_name' => $result['role_name']
-			);
+				return errorAjaxRender($e->getMessage());	
+			}
+		
+			foreach($role_ids as $role_id){
+				try{
+					$result = $role->roleInfo($role_id);
+				}catch(\Exception $e){
+					$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+					return errorAjaxRender($e->getMessage());
+				}	
+				/*$rolenames[$role_id] = $result['role_name'];*/
+				$rolenames[] = array(
+					'role_id' => $role_id,
+					'role_name' => $result['role_name']
+				);
+			}
 		}
-
 		if(empty($rolenames)){
 			$error = '该用户在该产品线没有设置角色';
 			$this->logger()->info($error,array('用户ID：'.$user_id,'产品线ID：'.$domain_id));
@@ -213,7 +243,8 @@ class ApiController extends Base
 	
 	public function has_resourceAction()
 	{
-		
+		$redis = $this->getRedis();
+		$all_urls = array();
 		$api = new ApiModel;
 		$user = new UserModel;
 		$domain =  new DomainModel;
@@ -225,6 +256,7 @@ class ApiController extends Base
 		$salt = $domain_info['domain_salt'];
 		$token = trim($this->getPost('token',''));
 		$public_key = $api->getPublicKey($token, $domain_id, $user_id,$salt);
+		$resource_infos = array();
 		
 		if(empty($token)){
 			$error = '调用该接口必须填写token';
@@ -308,13 +340,28 @@ class ApiController extends Base
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
-		try{
-			$all_urls = $api->resources($user_id,$domain_id);
-		}catch(\Exception $e){
-			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
-			return $this->errorAjaxRender($e->getMessage());
-		}	
 		
+		if(!empty($redis->get('uc_roles_'.$user_id.'_'.$domain_id))){
+			$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
+			foreach($role_id as $v){
+				$resource_infos[] = json_decode($redis->get('uc_role_info_'.$v))[1];  
+			}
+			
+			foreach($resource_infos as $val){
+					foreach($val as $v){
+						$all_urls[]['resource_url'] = $v->resource_url;
+					}
+			}
+			
+		}else{
+			try{
+				$all_urls = $api->resources($user_id,$domain_id);
+				$redis->set('uc_roles_'.$user_id.'_'.$domain_id,$api->role_ids($user_id,$domain_id));
+			}catch(\Exception $e){
+				$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
+				return $this->errorAjaxRender($e->getMessage());
+			}	
+		}
 		$mark = false;
 		foreach($all_urls as $val){
 			if($resource_url == $val['resource_url']){
