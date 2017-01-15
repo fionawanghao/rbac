@@ -76,6 +76,20 @@ class GrantController extends Base
 			$this->logger()->debug($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
+		
+		$redis = $this->getRedis();
+		$message = array(
+			'type' => 'grant',
+			'opt' => 'add_role',
+			'data' => array(
+				'user_id' => $user_id,
+				'role_id' => $role_id,
+				'domain_id' => $domain_id,
+			)
+		);
+		
+		$redis->lpush('uc_sync_queue',json_encode($message));
+		
 		$info = '授权成功';
 		$this->logger()->info($info,array('用户ID：'.$user_id.',产品线ID：'.$domain_id.',角色ID：'.$role_id));
 		return $this->ajaxRender(array(),$info);
@@ -117,6 +131,17 @@ class GrantController extends Base
 			$this->logger()->debug($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
+		$redis = $this->getRedis();
+		$message = array(
+			'type' => 'grant',
+			'opt' => 'del_role',
+			'data' => array(
+				'user_id' => $user_id,
+				'role_id' => $role_id
+			)
+		);
+		$redis->lpush('uc_sync_queue',json_encode($message));
+		
 		$info = '角色收回成功';
 		$this->logger()->debug($info,array('user_id:'.$user_id,'role_id'.$role_id));
 		return $this->ajaxRender(array(),$info);
@@ -202,11 +227,22 @@ class GrantController extends Base
 			return $this->errorAjaxRender($e->getMessage());
 			$this->logger()->debug($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 		}
+		
+		$redis = $this->getRedis();
+		$message = array(
+			'type' => 'grant',
+			'opt' => 'add_resource',
+			'data' => array(
+				'resource_id' => $resource_id,
+				'role_id' => $role_id
+			)
+		);
+		
+		$redis->lpush('uc_sync_queue',json_encode($message));
+		
 		$info = '添加权限成功';
 		$this->logger()->info($info,array('role_id'.$role_id,'resource_id'.$resource_id));
 		return $this->ajaxRender(array(),$info);
-		
-		
 	}
 	
 	public function del_resourceAction()
@@ -238,6 +274,19 @@ class GrantController extends Base
 			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
+		
+		$redis = $this->getRedis();
+		$message = array(
+			'type' => 'grant',
+			'opt' => 'del_resource',
+			'data' => array(
+				'resource_id' => $resource_id,
+				'role_id' => $role_id
+			)
+		);
+		var_dump($message);
+		$redis->lpush('uc_sync_queue',json_encode($message));
+		
 		$info = '权限收回成功';
 		$this->logger()->error($info,array('role_id:'.$role_id,',resource_id:'.$resource_id));
 		return $this->ajaxRender(array(),$info);

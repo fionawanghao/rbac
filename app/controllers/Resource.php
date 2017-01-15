@@ -66,6 +66,7 @@ class ResourceController extends Base
 			$this->logger()->debug($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
+
 		$info = '添加权限成功';
 		$arr = array('domain_id:'.$domain_id,'resource_url:'.$resource_url,'resource_name:'.$resource_name,'resource_desc:'.$resource_desc,'status:'.$status,'create_time:'.time(),'update_time:'.time());
 		$this->logger()->info($info,$arr);
@@ -98,7 +99,6 @@ class ResourceController extends Base
 	
 	public function updateAction()
 	{
-		
 		$resource = new ResourceModel;
 		$id = $this->getPost('id')  ;
 		$resource_url = $this->getPost('resource_url');
@@ -192,10 +192,17 @@ class ResourceController extends Base
 	
 	public function deleteAction()
 	{
-		
+		$redis = $this->getRedis();
+		 
 		$resource = new ResourceModel;
 		$id = explode(',',$this->getPost('id',''));
-		
+		$message = array(
+			'type' => 'resource',
+			'opt' => 'delete',
+			'data' => array(
+				'resource_id' => $id,
+			)
+		);
 		/*if(!is_array($id)){
 			$id = array($id);
 		}*/
@@ -233,6 +240,7 @@ class ResourceController extends Base
 		foreach($id as $a){
 			$this->logger()->info('id是'.$a.'的记录删除成功');
 		}
+		$redis->lpush('uc_sync_queue',json_encode($message));
 		return $this->ajaxRender(array(),'删除记录成功');
 			
 	}

@@ -26,7 +26,9 @@ class Base extends \Yaf_Controller_Abstract
 		
 		if($this->redis == null){
 			$redis = new \Redis();
-			$redis->connect('127.0.0.1',6379);
+			$ip = \Yaf_Registry::get('config')->redis->ip;
+			$port = \Yaf_Registry::get('config')->redis->port;
+			$redis->connect($ip,$port);
 		}
 		return $redis;
 	}

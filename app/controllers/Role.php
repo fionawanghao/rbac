@@ -9,7 +9,8 @@ class RoleController extends Base
 	private	$allow_status = array(1,2);
 	public function addAction()
 	{
-		
+		$redis = $this->getRedis();
+		//准备放入消息队列的信息
 		$domain_id = trim($this->getPost('domain_id',''));
 		$role_name = trim($this->getPost('role_name',''));
 		$role_desc = trim($this->getPost('role_desc',''));
@@ -76,6 +77,17 @@ class RoleController extends Base
 			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
+		$role_info_by_name = $role->roleInfoByNameDomainId($role_name,$domain_id);
+		$id = $role_info_by_name['id'];
+		$message = array(
+			'type' => 'role',
+			'opt' => 'add',
+			'data' => array(
+			'role_id' => $id,
+			'role_info'=> $role_info_by_name
+			)
+		);
+		$redis->lpush('uc_sync_queue',json_encode($message));
 		$error = '角色添加成功';
 		$arr = array('domain_id:'.$domain_id,'role_name:'.$role_name,'role_desc:'.$role_desc,'role_type:'.$role_type,'status:'.$status,'create_time:'.time(),'update_time:'.time());
 		$this->logger()->info($error,$arr);
@@ -109,7 +121,7 @@ class RoleController extends Base
 	
 	public function updateAction()
 	{
-		
+		$redis = $this->getRedis();
 		$role = new RoleModel;
 		$domain = new DomainModel;
 		$id = $this->getPost('id');
@@ -211,6 +223,17 @@ class RoleController extends Base
 			$this->logger()->error($e->getMessage(),$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($e->getMessage());
 		}
+		
+		$role_info = $role->roleInfo($id);
+		$message = array(
+			'type' => 'role',
+			'opt' => 'update',
+			'data' => array(
+			'role_id' => $id,
+			'role_info'=> $role_info
+			)
+		);
+		$redis->lpush('uc_sync_queue',json_encode($message));
 		$info = '更新ID为'.$id.'的角色信息成功';
 		$this->logger()->error($info,$data);	
 		return $this->ajaxRender(array(), $info);
@@ -264,6 +287,16 @@ class RoleController extends Base
 			$error = 'id是'.$a.'的记录删除成功';
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 		}
+		$redis = $this->getRedis();
+		$message = array(
+			'type' => 'role',
+			'opt' => 'delete',
+			'data' => array(
+			'role_id' => $id
+			)
+		);
+		
+		$redis->lpush('uc_sync_queue',json_encode($message));
 		return $this->ajaxRender(array(),'删除记录成功');
 	}
 }

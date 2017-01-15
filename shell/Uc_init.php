@@ -1,156 +1,159 @@
 <?php
-	function jsonRender($data)
-	{
-        echo json_encode($data);
-	}
-	function getDb(){
-		$db = null;
-		if($db == null) {
-			$database =  'domainpermission';
-			$hostname = '192.168.10.172';
-			$password = '123456';
-			$username = 'wp';
-			$port = '3306';
-			$dsn = 'mysql:dbname='.$database.';host='.$hostname.';port='.$port;
-			$db = new \PDO($dsn, $username, $password);	
-		}
-		return $db;
-	}	
+require_once "Mysql.php";
+require_once "Redis.php";
+
+
+class UcInit {
 	
-	function getRedis(){
-		$redis = null;
-		if($redis == null){
-			$redis = new \Redis();
-			$redis->connect('127.0.0.1',6379);
-		}
-		return $redis;
+	private $db = null;
+	
+	private $redis = null;
+	
+	public function __construct() {
+		$this->db = GetDb::getInstance()->getDb();
+		$this->redis = GetRedis::getInstance()->getRedis();
 	}
 	
-	
-	
-	function ajaxRender($data = array(), $msg = null)
-	{
-		$data = array('ret' => 0, 'data' => $data, 'msg' => $msg);
-		return jsonRender($data);
-	}
-	
-	function errorAjaxRender($msg = null){
-		$data = array('ret' => 1, 'msg' => $msg);
-		return jsonRender($data);
-	}
-	
-	function getDomainIds(){
+	private function getDomainIds(){
 		$domain_ids = array();
-		$db = getDb();
 		$sql = 'select id from uc_domain';
-		$stm = $db->prepare($sql);
+		$stm = $this->db->prepare($sql);
 		if(!$stm->execute()){
-			return errorAjaxRender('fail to get domain_ids');
+			return $this->errorAjaxRender('fail to get domain_ids');
 		}
 		$domain_ids = $stm->fetchAll(PDO::FETCH_NUM);
 		return $domain_ids;
 	}
 	
-	function getUserIds(){
+	private function getUserIds(){
 		$user_ids = array();
-		$db = getDb();
 		$sql = 'select id from uc_user';
-		$stm = $db->prepare($sql);
+		$stm = $this->db->prepare($sql);
 		if(!$stm->execute()){
-			return errorAjaxRender('fail to get domain_ids');
+			return $this->errorAjaxRender('fail to get domain_ids');
 		}
 		$user_ids = $stm->fetchAll(PDO::FETCH_NUM);
 		return $user_ids;
 	}
 	
-	$redis = getRedis();
-	$db = getDb();
-	$domain_ids = getDomainIds();
-	$user_ids = getUserIds();
-	$role_ids =array();
-	$uc_roles_keys = array();
-	foreach($domain_ids as $key => $val){
-		foreach($val as $v){
-			$domain_ids[$key] = $v;
-		}
-	}
-	foreach($user_ids as $key => $val){
-		foreach($val as $v){
-			$user_ids[$key] = $v;
-		}
-	}
-	
-	foreach($domain_ids as $domain_id){
-		foreach($user_ids as $user_id){
-			
-			$sql = 'select role_id from uc_user_domain_role_relation where domain_id=? and user_id=?';
-			$stm = $db->prepare($sql);
-			if(!$stm->execute(array($domain_id,$user_id))){
-				return errorAjaxRender('fail to get role_ids');
-			}
-			$role_ids = $stm->fetchAll(PDO::FETCH_NUM);
-			
-			if(!empty($role_ids) && is_array($role_ids)){
-				foreach($role_ids as $key => $val){
-					foreach($val as $v){
-						$role_ids[$key] = $v;
-					}
-				}
-				//将所有的role_ids放入redis
-				$redis->set('uc_roles_'.$user_id.'_'.$domain_id, json_encode($role_ids));
-				$uc_roles_keys[] ='uc_roles_'.$user_id.'_'.$domain_id;
-			}
-			
-		}
-	}
-	//将存入redis的role_ids的key组成一个数组也存入到redis中，留用
-	$redis->set('uc_roles_keys',json_encode($uc_roles_keys));
-	//var_dump($redis->get('uc_roles_23_7'));
-	/*uc_role_info_roleId => array(
-		name=>xxx
-		desc=>xxxx,
-		resourceinfo => array(
-		array(
-			'name' => ''
-			id => ''
-			resource_url => ''
-		)
-	)*/
-	
-	
-	function getAllRoleIds(){
+	private function getAllRoleIds(){
 		$role_ids = array();
-		$db = getDb();
 		$sql = 'select id from uc_role';
-		$stm = $db->prepare($sql);
+		$stm = $this->db->prepare($sql);
 		if(!$stm->execute()){
-			return errorAjaxRender('fail to get role_ids');
+			return $this->errorAjaxRender('fail to get role_ids');
 		}
 		$role_ids = $stm->fetchAll(PDO::FETCH_NUM);
 		return $role_ids;
 	}
-	$all_role_ids = getAllRoleIds();
-	$role_info = array();
-	$a = array();
-	foreach($all_role_ids as $v){
-		 
-			$sql1 = 'select * from uc_role where id=?';
-			$sql2 = 'select * from  uc_domain_role_resource_relation where role_id=?';
-			$stm1 = $db->prepare($sql1);
-			if(!$stm1->execute($v)){
-				return errorAjaxRender('fail to get role_info');
+	
+	private function initDomainAndUser() {
+		$domain_ids = $this->getDomainIds();
+		$user_ids = $this->getUserIds();
+		$role_ids =array();
+		$uc_roles_keys = array();
+		foreach($domain_ids as $key => $val){
+			foreach($val as $v){
+				$domain_ids[$key] = $v;
 			}
-			$role_info = $stm1->fetch(PDO::FETCH_ASSOC);
-			$stm2 = $db->prepare($sql2);
-			if(!$stm2->execute($v)){
-				return errorAjaxRender('fail to get role_info');
+		}
+		foreach($user_ids as $key => $val){
+			foreach($val as $v){
+				$user_ids[$key] = $v;
 			}
-			$resource_info = $stm2->fetchAll(PDO::FETCH_ASSOC);
-			if(is_array($resource_info) && !empty($resource_info)){
-				$redis->set('uc_role_info_'.$v[0],json_encode(array($role_info,$resource_info)));
-				$a[] = $resource_info;
+		}
+		
+		foreach($domain_ids as $domain_id){
+			foreach($user_ids as $user_id){
+				$sql = 'select role_id from uc_user_domain_role_relation where domain_id=? and user_id=?';
+				$stm = $this->db->prepare($sql);
+				if(!$stm->execute(array($domain_id,$user_id))){
+					return $this->errorAjaxRender('fail to get role_ids');
+				}
+				$role_ids = $stm->fetchAll(PDO::FETCH_NUM);
+				
+				if(!empty($role_ids) && is_array($role_ids)){
+					foreach($role_ids as $key => $val){
+						foreach($val as $v){
+							$role_ids[$key] = $v;
+						}
+					}
+					//将所有的role_ids放入redis
+					$this->redis->set('uc_roles_'.$user_id.'_'.$domain_id, json_encode($role_ids));
+					$uc_roles_keys[] ='uc_roles_'.$user_id.'_'.$domain_id;
+				}
 			}
+		}
+		//将存入redis的role_ids的key组成一个数组也存入到redis中，留用
+		$this->redis->set('uc_roles_keys',json_encode($uc_roles_keys));
 	}
+	private function getAllResourceIdsOfRole($role_id){//$role_id 一维array
+		$resource_ids = array();
+		$sql = 'select resource_id from uc_domain_role_resource_relation where role_id=?';
+		$stm = $this->db->prepare($sql);
+		$stm->execute($role_id);
+		$resource_ids = $stm->fetchAll(PDO::FETCH_NUM);
+		if(!$resource_ids){
+			$resource_ids = array();
+		}
+		foreach($resource_ids as $key => $val){
+			foreach($val as $v){
+				$resource_ids[$key] = $v;
+			}
+		}
+		return $resource_ids;//一维数组
+	}
+	
+	private function getAllResourceInfo($resource_ids){ //$reosurce_ids一维数组
+		$num = count($resource_ids);
+		$para = rtrim(str_repeat('?,',$num),',');
+		$sql = 'select * from  uc_resource where id in ('.$para.')';
+		$stm = $this->db->prepare($sql);
+		$stm->execute($resource_ids);
+		$resource_info = $stm->fetchAll(PDO::FETCH_ASSOC);
+		return $resource_info;
+	}
+	
+	private function initRole() {
+		$sql1 = 'select * from uc_role where id=?';
+		$stm1 = $this->db->prepare($sql1);
+		$role_ids = $this->getAllRoleIds();
+		$kv = array();
+		foreach($role_ids as $role_id){ // role_id = 28 27		
+			$resource_info = array();
+			$stm1->execute($role_id);	
+			$role_info = $stm1->fetch(PDO::FETCH_ASSOC);
+			$resource_ids = $this->getAllResourceIdsOfRole($role_id);
+			if(empty($resource_ids)){
+				$this->redis->set('uc_role_info_'.$role_id[0],json_encode(array($role_info)));
+			}else{
+				$resource_info = $this->getAllResourceInfo($resource_ids);
+				$this->redis->set('uc_role_info_'.$role_id[0],json_encode(array($role_info,$resource_info)));
+			}
+		}
+	}
+	
+	
+	public function run() {
+		$this->initDomainAndUser();
+		$this->initRole();
+	}
+}
+
+$init = new UcInit();
+$init->run();
+
+	
+	
+	
+
+	
+	
+	
+	
+	
+	
+	
 	
 
 

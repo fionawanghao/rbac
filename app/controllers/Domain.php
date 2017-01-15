@@ -203,6 +203,15 @@ class DomainController extends Base
 	{
 		$domain = new DomainModel;
 		$id = explode(',',$this->getPost('id',''));
+		$redis = $this->getRedis();
+		//准备放入消息队列的信息
+		$message = array(
+			'type' => 'domain',
+			'opt' => 'delete',
+			'data' => array(
+			'domain_id' => $id,
+			)
+		);
 		
 		/*if(!is_array($id)){
 			$id = array($id);
@@ -238,7 +247,7 @@ class DomainController extends Base
 		foreach($id as $a){
 			$this->logger()->info('删除ID为'.$a.'的产品线记录成功');
 		}
-		
+		$redis->lpush('uc_sync_queue',json_encode($message));
 		return $this->ajaxRender(array(),'删除记录成功');	
 	}
 	

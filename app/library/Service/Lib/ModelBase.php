@@ -14,6 +14,7 @@ class ModelBase
 			$port = \Yaf_Registry::get('config')->db->port;
 			$dsn = 'mysql:dbname='.$database.';host='.$hostname.';port='.$port;
 			self::$db = new \PDO($dsn, $username, $password);	
+		
 		}
 		return self::$db;
 	}	

@@ -215,7 +215,15 @@ class UserController extends Base
 		
 		$user = new UserModel;
 		$id = explode(',',$this->getPost('id',''));
-		
+		$redis = $this->getRedis();
+		//准备放入消息队列的信息
+		$message = array(
+			'type' => 'user',
+			'opt' => 'delete',
+			'data' => array(
+			'user_id' => $id,
+			)
+		);
 		/*if(!is_array($id)){
 			$id = array($id);
 		}*/
@@ -256,6 +264,7 @@ class UserController extends Base
 		foreach($id as $a){
 			$this->logger()->info('ID为'.$a.'的记录删除记录成功');
 		}	
+		$redis->lpush('uc_sync_queue',json_encode($message));
 		return $this->ajaxRender(array(),'删除记录成功');
 	}
 }

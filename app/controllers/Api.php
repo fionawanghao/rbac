@@ -14,7 +14,6 @@ class ApiController extends Base
 	*/
 	public function resourcesAction()
 	{
-		
 		$api = new ApiModel;
 		$user = new UserModel;
 		$domain = new DomainModel;
@@ -95,8 +94,9 @@ class ApiController extends Base
 		$role_id = array();
 		$resource_info = array();
 		$result = array();
-		if(!empty($redis->get('uc_roles_'.$user_id.'_'.$domain_id))){
-			$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
+		$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
+		if($role_id){
+			
 			foreach($role_id as $v){
 				$resource_info[] = json_decode($redis->get('uc_role_info_'.$v))[1];  
 			}
@@ -202,12 +202,13 @@ class ApiController extends Base
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
-		
-		if(!empty($redis->get('uc_roles_'.$user_id.'_'.$domain_id))){
+		$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
+		if($role_id){
 			$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
 			foreach($role_id as $k => $v){
-				$rolenames[$k]['role_id'] = json_decode($redis->get('uc_role_info_'.$v))[0]->id;  
-				$rolenames[$k]['role_name'] = json_decode($redis->get('uc_role_info_'.$v))[0]->role_name;  
+				$rolenames = json_decode(($redis->get('uc_role_info_'.$v)),true);
+				$rolenames[$k]['role_id'] = $rolenames['id'];  
+				$rolenames[$k]['role_name'] = $rolenames['role_name'];  
 			}
 		}else{
 			try{
@@ -340,9 +341,8 @@ class ApiController extends Base
 			$this->logger()->error($error,$this->formatLog(__CLASS__ ,__FUNCTION__,__LINE__));
 			return $this->errorAjaxRender($error);
 		}
-		
-		if(!empty($redis->get('uc_roles_'.$user_id.'_'.$domain_id))){
-			$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
+		$role_id = json_decode($redis->get('uc_roles_'.$user_id.'_'.$domain_id));
+		if($role_id){
 			foreach($role_id as $v){
 				$resource_infos[] = json_decode($redis->get('uc_role_info_'.$v))[1];  
 			}
